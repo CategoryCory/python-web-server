@@ -2,7 +2,7 @@
 name = "python-web-server"
 version = "0.1.0"
 description = ""
-authors = ["Cory Coward <cory@c2softwaresolutions.com>"]
+authors = ["Cory Coward"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
