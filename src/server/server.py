@@ -16,10 +16,7 @@ Upgrade-Insecure-Requests: 1
 Content-Type: text/html; charset=UTF-8
 Content-Length: 345
 
-{
-    'field1': 'value1',
-    'field2': 'value2'
-}
+{"field1": "value1","field2": "value2"}
 '''
 
     # print(test_request)

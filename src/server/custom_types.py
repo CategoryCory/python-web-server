@@ -7,7 +7,7 @@ class HttpRequestDetails:
     request_path: str
     http_version: dict[str, int]
     headers: dict[str, str]
-    body: list[str]
+    body: dict[str, str] | None = None
 
 
 @dataclasses.dataclass(frozen=True)

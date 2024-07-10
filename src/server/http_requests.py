@@ -1,7 +1,8 @@
 import custom_types
 import exceptions
+import json
 
-http_methods: list[str] = ['GET', 'POST', 'PUT', 'DELETE']
+http_methods: list[str] = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'OPTIONS', 'TRACE', 'PATCH']
 
 
 def parse_request(req: str) -> custom_types.HttpRequestDetails:
@@ -40,7 +41,8 @@ def parse_request(req: str) -> custom_types.HttpRequestDetails:
 
     # Get headers
     headers_dict: dict[str, str] = {}
-    header_parts: list[list[str]] = [line.split(':', 1) for line in req_lines[1:empty_line_index - 1]]
+    stop_line: int = len(req_lines) if empty_line_index == -1 else empty_line_index - 1
+    header_parts: list[list[str]] = [line.split(':', 1) for line in req_lines[1:stop_line]]
     for hdr_part in header_parts:
         if len(hdr_part) != 2:
             raise exceptions.HttpRequestException('Invalid header format')
@@ -48,6 +50,12 @@ def parse_request(req: str) -> custom_types.HttpRequestDetails:
         headers_dict[hdr_part[0]] = hdr_part[1].strip()
 
     # Get body, if exists
-    req_body = req_lines[empty_line_index + 1:] if empty_line_index != -1 else []
+    parsed_body = None
+    if empty_line_index != -1:
+        try:
+            req_body = ''.join([line.replace('\'', '"').strip() for line in req_lines[stop_line + 2:]])
+            parsed_body = json.loads(req_body)
+        except json.decoder.JSONDecodeError:
+            raise exceptions.HttpRequestException('Invalid JSON body')
 
-    return custom_types.HttpRequestDetails(http_method, path, version_dict, headers_dict, req_body)
+    return custom_types.HttpRequestDetails(http_method, path, version_dict, headers_dict, parsed_body)
