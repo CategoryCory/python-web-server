@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "python-web-server"
+name = "server"
 version = "0.1.0"
 description = ""
 authors = ["Cory Coward"]
@@ -7,7 +7,17 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+pytest = "^8.2.2"
+mypy = "^1.10.1"
 
+[tool.poetry.scripts]
+server = "server:server"
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = [
+    "--import-mode=importlib",
+]
 
 [build-system]
 requires = ["poetry-core"]
