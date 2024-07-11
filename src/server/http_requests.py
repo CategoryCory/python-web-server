@@ -6,6 +6,15 @@ http_methods: list[str] = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'CONNECT', 'O
 
 
 def parse_request(req: str) -> custom_types.HttpRequestDetails:
+    """
+    Parses an HTTP request and returns a HttpRequestDetails object.
+
+    :param req: The HTTP request to parse.
+    :type req: str
+    :return: An HttpRequestDetails object containing the parsed data.
+    :rtype: custom_types.HttpRequestDetails
+    :raises exceptions.HttpRequestError: If the request is not well-formed.
+    """
     req_lines: list[str] = req.splitlines()
     empty_line_index: int = (next((i for i, line in enumerate(req_lines) if line.strip() == ""), len(req_lines))
                              if '' in req_lines
