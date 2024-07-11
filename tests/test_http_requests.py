@@ -1,9 +1,8 @@
 import pytest
 import _pytest.fixtures as fixtures
-import src.server.custom_types as ct
-import src.server.http_requests as hreq
-
-# TODO: Add failing tests
+import src.custom_types as ct
+import src.http_requests as hreq
+import src.exceptions as ex
 
 
 @pytest.fixture
@@ -73,10 +72,52 @@ Content-Length: 345
 '''
 
 
+@pytest.fixture
+def get_request_with_bad_json() -> str:
+    return '''GET /blog/posts/1234 HTTP/1.1
+Host: www.google.com
+User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+Connection: keep-alive
+Upgrade-Insecure-Requests: 1
+Content-Type: text/html; charset=UTF-8
+Content-Length: 345
+
+{field1: value1, field2: value2}
+'''
+
+
 class TestHttpRequestParsing:
     """
     Unit tests for the parse_request function.
     """
+
+    @pytest.mark.parametrize(
+        'request_line, expected_error_message',
+        [
+            pytest.param('PLAYSTATION /blog/posts HTTP/1.1', 'Invalid HTTP method: PLAYSTATION'),
+            pytest.param('GET HTTP/1.1', 'Invalid request header length'),
+            pytest.param('GET /blog/posts HTTPS/1.1', 'Invalid HTTP version'),
+            pytest.param('GET /blog/posts HTTP/1.1.0', 'Invalid HTTP version'),
+        ]
+    )
+    def test_parse_request_bad_request_line(self, request_line: str, expected_error_message: str) -> None:
+        """
+        Tests that HttpRequestExceptions are correctly raised for bad request lines.
+
+        :param request_line: The request line to test
+        :type request_line: str
+        :param expected_error_message: The expected error message in the HttpRequestException raised.
+        :type expected_error_message: str
+        :return: None
+        """
+        with pytest.raises(ex.HttpRequestException) as excinfo:
+            parsed_request: ct.HttpRequestDetails = hreq.parse_request(request_line)
+
+        assert str(excinfo.value) == expected_error_message
+
     def test_parse_request_line(self, get_request_no_body: str) -> None:
         """
         Tests that the parse_request function parses the request line correctly.
@@ -152,3 +193,16 @@ class TestHttpRequestParsing:
         assert len(parsed_request.body) == 2
         assert parsed_request.body['field1'] == 'value1'
         assert parsed_request.body['field2'] == 'value2'
+
+    def test_parse_request_bad_json(self, get_request_with_bad_json: str) -> None:
+        """
+        Tests that an HttpRequestException is raised if JSON body can't be parsed.
+
+        :param get_request_with_bad_json: A fixture representing a request with an improper JSON body.
+        :type get_request_with_bad_json: str
+        :return: None
+        """
+        with pytest.raises(ex.HttpRequestException) as excinfo:
+            parsed_request: ct.HttpRequestDetails = hreq.parse_request(get_request_with_bad_json)
+
+        assert str(excinfo.value) == 'Invalid JSON body'

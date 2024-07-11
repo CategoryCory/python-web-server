@@ -14,7 +14,7 @@ mypy = "^1.10.1"
 server = "server:server"
 
 [tool.pytest.ini_options]
-pythonpath = "."
+pythonpath = [".", "src"]
 addopts = [
     "--import-mode=importlib",
 ]
