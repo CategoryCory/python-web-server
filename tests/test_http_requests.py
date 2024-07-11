@@ -73,7 +73,7 @@ Content-Length: 345
 '''
 
 
-def test_parse_request_line(get_request_no_body):
+def test_parse_request_line(get_request_no_body: str) -> None:
     parsed_request: ct.HttpRequestDetails = hreq.parse_request(get_request_no_body)
     assert parsed_request.request_method == 'GET'
     assert parsed_request.request_path == '/blog/posts/1234'
@@ -83,7 +83,7 @@ def test_parse_request_line(get_request_no_body):
     assert parsed_request.http_version['ver_minor'] == 1
 
 
-def test_parse_request_headers(get_headers, get_request_no_body):
+def test_parse_request_headers(get_headers: list[str], get_request_no_body: str) -> None:
     parsed_request: ct.HttpRequestDetails = hreq.parse_request(get_request_no_body)
     assert len(parsed_request.headers) == 9
     assert get_headers == list(parsed_request.headers.keys())
@@ -99,7 +99,7 @@ def test_parse_request_headers(get_headers, get_request_no_body):
     assert parsed_request.headers['Content-Length'] == '345'
 
 
-def test_parse_request_no_body_is_none(get_request_no_body):
+def test_parse_request_no_body_is_none(get_request_no_body: str) -> None:
     parsed_request: ct.HttpRequestDetails = hreq.parse_request(get_request_no_body)
     assert parsed_request.body is None
 
@@ -111,7 +111,7 @@ def test_parse_request_no_body_is_none(get_request_no_body):
         pytest.param('get_request_with_single_line_body'),
     ],
 )
-def test_parse_request_multiline_body(req_name: str, request: Fixtures.FixtureRequest):
+def test_parse_request_multiline_body(req_name: str, request: Fixtures.FixtureRequest) -> None:
     req = request.getfixturevalue(req_name)
     parsed_request: ct.HttpRequestDetails = hreq.parse_request(req)
     assert parsed_request.body is not None
